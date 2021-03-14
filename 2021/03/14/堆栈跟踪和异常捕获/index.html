@@ -1,0 +1,225 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>堆栈跟踪和异常捕获 | An的博客</title><meta name="keywords" content="java基础反复练习"><meta name="author" content="An"><meta name="copyright" content="An"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="1. 返回堆栈跟踪（1）直接获取当前线程的堆栈信息 1234public static StackTraceElement[] method1() &amp;#123;    method2();    return Thread.currentThread().getStackTrace();&amp;#125; （2）返回调用它的方法的名称使用StackTraceElement 类的 getMethodNam">
+<meta property="og:type" content="article">
+<meta property="og:title" content="堆栈跟踪和异常捕获">
+<meta property="og:url" content="https://jiaan001.github.io/2021/03/14/%E5%A0%86%E6%A0%88%E8%B7%9F%E8%B8%AA%E5%92%8C%E5%BC%82%E5%B8%B8%E6%8D%95%E8%8E%B7/index.html">
+<meta property="og:site_name" content="An的博客">
+<meta property="og:description" content="1. 返回堆栈跟踪（1）直接获取当前线程的堆栈信息 1234public static StackTraceElement[] method1() &amp;#123;    method2();    return Thread.currentThread().getStackTrace();&amp;#125; （2）返回调用它的方法的名称使用StackTraceElement 类的 getMethodNam">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://jiaan001.github.io/img/a1.jpg">
+<meta property="article:published_time" content="2021-03-14T11:06:54.000Z">
+<meta property="article:modified_time" content="2021-03-14T11:20:14.176Z">
+<meta property="article:author" content="An">
+<meta property="article:tag" content="java基础反复练习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://jiaan001.github.io/img/a1.jpg"><link rel="shortcut icon" href="/img/an3.png"><link rel="canonical" href="https://jiaan001.github.io/2021/03/14/%E5%A0%86%E6%A0%88%E8%B7%9F%E8%B8%AA%E5%92%8C%E5%BC%82%E5%B8%B8%E6%8D%95%E8%8E%B7/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: An","link":"链接: ","source":"来源: An的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}
+
+// https://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript
+const getScript = url => new Promise((resolve, reject) => {
+  const script = document.createElement('script')
+  script.src = url
+  script.async = true
+  script.onerror = reject
+  script.onload = script.onreadystatechange = function() {
+    const loadState = this.readyState
+    if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+    script.onload = script.onreadystatechange = null
+    resolve()
+  }
+  document.head.appendChild(script)
+})</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-03-14 19:20:14'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+   if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }const asideStatus = saveToLocal.get('aside-status')
+if (asideStatus !== undefined) {
+   if (asideStatus === 'hide') {
+     document.documentElement.classList.add('hide-aside')
+   } else {
+     document.documentElement.classList.remove('hide-aside')
+   }
+}})()</script><meta name="generator" content="Hexo 5.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/img/a.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">5</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">2</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于An</span></a></div></div></div></div><div id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/a1.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">An的博客</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于An</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">堆栈跟踪和异常捕获</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-03-14T11:06:54.000Z" title="发表于 2021-03-14 19:06:54">2021-03-14</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-03-14T11:20:14.176Z" title="更新于 2021-03-14 19:20:14">2021-03-14</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%9F%BA%E7%A1%80%E8%AE%AD%E7%BB%83/">基础训练</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="1-返回堆栈跟踪"><a href="#1-返回堆栈跟踪" class="headerlink" title="1. 返回堆栈跟踪"></a>1. 返回堆栈跟踪</h2><p>（1）直接获取当前线程的堆栈信息</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public static StackTraceElement[] method1() &#123;</span><br><span class="line">    method2();</span><br><span class="line">    return Thread.currentThread().getStackTrace();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>（2）返回调用它的方法的名称<br>使用StackTraceElement 类的 getMethodName 方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public static String method1() &#123;</span><br><span class="line">    method2();</span><br><span class="line">    StackTraceElement[] stackTraceElements &#x3D; Thread.currentThread().getStackTrace();</span><br><span class="line">    return stackTraceElements[2].getMethodName();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>method1是main调用的，所以如果输出返回内容，则为main。</p>
+<p>注意：<br>stackTraceElement[0].getMethodName(); ——得到getStackTrace<br>stackTraceElement[1].getMethodName(); ——得到它自己的名称</p>
+<p>（3）返回调用它的代码的行号<br>使用StackTraceElement 类的 getLineNumber 方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public static int method1() &#123;</span><br><span class="line">    method2();</span><br><span class="line">    StackTraceElement[] stackTraceElements &#x3D; Thread.currentThread().getStackTrace();</span><br><span class="line">    return  stackTraceElements[2].getLineNumber();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>（4）返回堆栈跟踪深度<br>堆栈跟踪的深度也就是求堆栈跟踪中的方法数量。<br>使用 Thread.currentThread().getStackTrace()实现如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">public static int getStackTraceDepth() &#123;</span><br><span class="line">    StackTraceElement[] stackTraceElements &#x3D; Thread.currentThread().getStackTrace();</span><br><span class="line">    int stackTraceLength &#x3D; stackTraceElements.length;</span><br><span class="line">    System.out.println(stackTraceLength);</span><br><span class="line">    return stackTraceLength;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="2-对异常的总结"><a href="#2-对异常的总结" class="headerlink" title="2. 对异常的总结"></a>2. 对异常的总结</h2><p>首先异常是一种特殊的机制，可以让我们在程序中处理错误。比如程序中可能发生一些这样的错误：程序可能会在硬盘已满时尝试写入文件，程序中可能出现数字除以0的情况，等等。所有这些动作都会导致错误。通常，结果是程序立即终止，因为在这种情况下继续执行代码没有意义。</p>
+<p>java中，异常分为必须捕获的异常和不必捕获的异常。默认情况下，必须捕获所有异常。异常的分类和继承关系如下。</p>
+<p><img src="/img/Exception.jpeg" alt="Exception"></p>
+<p>其中，Java规定：</p>
+<ul>
+<li>必须捕获的异常，包括Exception及其子类，但不包括RuntimeException及其子类，这种类型的异常称为Checked Exception。</li>
+<li>不需要捕获的异常，包括Error及其子类，RuntimeException及其子类。</li>
+</ul>
+<p>异常处理机制：</p>
+<p>异常抛出：当一个方法出现错误引发异常时，方法创建异常对象并交付运行时系统，异常对象中包含了异常类型和异常出现时的程序状态等异常信息。运行时系统负责寻找处置异常的代码并执行。用throw语句抛出。</p>
+<p>异常捕获：在方法抛出异常之后，运行时系统将转为寻找合适的异常处理器。潜在的异常处理器是异常发生时依次存留在调用栈中的方法的集合。当异常处理器所能处理的异常类型与方法抛出的异常类型相符时，即为合适的异常处理器。运行时系统从发生异常的方法开始，依次回查调用栈中的方法，直至找到含有合适异常处理器的方法并执行。当运行时系统遍历调用栈而未找到合适的异常处理器，则运行时系统终止。同时，意味着Java程序的终止。用try … catch捕获。把可能发生异常的语句放在try { … }中，然后使用catch捕获对应的Exception及其子类。</p>
+<h3 id="2-1-异常只捕获异常"><a href="#2-1-异常只捕获异常" class="headerlink" title="2.1 异常只捕获异常"></a>2.1 异常只捕获异常</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">public class Solution &#123;</span><br><span class="line">    public static void main(String[] args) throws Exception &#123;</span><br><span class="line">        method1();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void method1() throws NullPointerException, ArithmeticException, FileNotFoundException, URISyntaxException &#123;</span><br><span class="line">        int i &#x3D; (int) (Math.random() * 4);</span><br><span class="line">        if (i &#x3D;&#x3D; 0)</span><br><span class="line">            throw new NullPointerException();</span><br><span class="line">        if (i &#x3D;&#x3D; 1)</span><br><span class="line">            throw new ArithmeticException();</span><br><span class="line">        if (i &#x3D;&#x3D; 2)</span><br><span class="line">            throw new FileNotFoundException();</span><br><span class="line">        if (i &#x3D;&#x3D; 3)</span><br><span class="line">            throw new URISyntaxException(&quot;&quot;, &quot;&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面代码中method1方法会抛出两个继承 Exception 的异常和两个继承 RuntimeException 的异常：NullPointerException, ArithmeticException, FileNotFoundException, URISyntaxException.此时你要捕获 NullPointerException 和 FileNotFoundException，而不捕获 ArithmeticException 或 URISyntaxException。</p>
+<p>限制条件是：</p>
+<ul>
+<li>main 方法必须调用 method1。</li>
+<li>不要更改 method1 方法。</li>
+<li>main 方法必须捕获 NullPointerException 异常。</li>
+<li>main 方法必须捕获 FileNotFoundException 异常。</li>
+<li>main 方法不得捕获 ArithmeticException 异常。</li>
+<li>main 方法不得捕获 URISyntaxException 异常。</li>
+</ul>
+<p>如何做到这一点呢？</p>
+<p>具体实现中，我的实现方式是，在main方法中指定出需要捕获的具体异常即可，代码为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) throws Exception &#123;</span><br><span class="line">    try &#123;</span><br><span class="line">        method1();</span><br><span class="line">    &#125; catch (NullPointerException | FileNotFoundException e) &#123;</span><br><span class="line">        System.out.println(&quot;异常捕获：&quot; + e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-2-捕获一组异常"><a href="#2-2-捕获一组异常" class="headerlink" title="2.2 捕获一组异常"></a>2.2 捕获一组异常</h3><p>此时由于会存在多个catch，导致catch的顺序将非常重要，实现时遵循一个原则：子类必须写在前面。</p>
+<p>练习题目：<br>1.有三个连续继承 Exception 的异常。<br>2.Exception1 类 extends Exception<br>3.Exception2 类 extends Exception1<br>4.Exception3 类 extends Exception2<br>5.有一种方法如下：<br><code>public static void method1() throws Exception1, Exception2, Exception3</code><br>6.编写一个捕获所有如下三个异常的 catch 块：Exception1、Exception2 和 Exception3</p>
+<p>Requirements:<br>1. main 方法必须调用 method1。<br>2. main 方法必须捕获 Exception1 异常。<br>3. main 方法必须捕获 Exception2 异常。<br>4. main 方法必须捕获 Exception3 异常。<br>5. 不要更改 method1 方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public class Solution &#123;</span><br><span class="line">    public static void main(String[] args) throws Exception &#123;</span><br><span class="line">        method1();</span><br><span class="line">    &#125;</span><br><span class="line">    public static void method1() throws Exception1, Exception2, Exception3 &#123;</span><br><span class="line">        int i &#x3D; (int) (Math.random() * 3);</span><br><span class="line">        if (i &#x3D;&#x3D; 0)</span><br><span class="line">            throw new Exception1();</span><br><span class="line">        if (i &#x3D;&#x3D; 1)</span><br><span class="line">            throw new Exception2();</span><br><span class="line">        if (i &#x3D;&#x3D; 2)</span><br><span class="line">            throw new Exception3();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>遵循子类必须写在前面的原则后，我在main方法中实现如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) throws Exception &#123;</span><br><span class="line">    try &#123;</span><br><span class="line">        method1();</span><br><span class="line">    &#125; catch (Exception3 e) &#123;</span><br><span class="line"></span><br><span class="line">    &#125; catch (Exception2 e) &#123;</span><br><span class="line"></span><br><span class="line">    &#125; catch (Exception1 e) &#123;</span><br><span class="line"></span><br><span class="line">    &#125; catch (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-3-捕获自定义异常"><a href="#2-3-捕获自定义异常" class="headerlink" title="2.3 捕获自定义异常"></a>2.3 捕获自定义异常</h3><p>给定代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">public class Solution &#123;</span><br><span class="line">    public static StatelessBean BEAN &#x3D; new StatelessBean();</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        handleExceptions();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void handleExceptions() &#123;</span><br><span class="line">        BEAN.throwExceptions();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static class StatelessBean &#123;</span><br><span class="line">        public void log(Exception exception) &#123;</span><br><span class="line">            System.out.println(exception.getMessage() + &quot;, &quot; + exception.getClass().getSimpleName());</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        public void throwExceptions() throws CharConversionException, FileSystemException, IOException &#123;</span><br><span class="line">            int i &#x3D; (int) (Math.random() * 3);</span><br><span class="line">            if (i &#x3D;&#x3D; 0)</span><br><span class="line">                throw new CharConversionException();</span><br><span class="line">            if (i &#x3D;&#x3D; 1)</span><br><span class="line">                throw new FileSystemException(&quot;&quot;);</span><br><span class="line">            if (i &#x3D;&#x3D; 2)</span><br><span class="line">                throw new IOException();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>题目如下：<br>    1. 分析由 BEAN.throwExceptions 方法抛出的异常。<br>    2. handleExceptions 方法必须调用 BEAN.throwExceptions 方法并处理异常：<br>    2.1. 如果有一个 FileSystemException，则记录下来（调用 BEAN.log 方法）并重新抛出。<br>    2.2. 如果有一个 CharConversionException 或任何其他 IOException，则只需记录下来（调用 BEAN.log 方法)）。<br>    3. 在 handleExceptions 方法中添加项目 2.1 中抛出的异常类。<br>    4. 在 main 方法中，记录异常以处理剩余异常。使用 try-catch。</p>
+<p>Requirements:<br>    1. handleExceptions 方法应记录 FileSystemException（调用 BEAN.log 方法），然后将其重新抛出。<br>    1. handleExceptions 方法应只记录 CharConversionException（调用 BEAN.log 方法）。<br>    3. handleExceptions 方法应只记录 IOException。<br>    4. 在 handleExceptions 方法中添加 FileSystemException 类。<br>    5. main 方法应使用 try-catch。<br>    6. main 方法应记录 handleExceptions 方法抛出的异常。</p>
+<p>这道简单的题目在捕获自定义的基础上，考察了异常捕获和抛出的结合的基本操作。比如限制条件1考察的是捕获到异常，然后将该异常再重新抛出。我的实现方式是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            handleExceptions();</span><br><span class="line">        &#125;catch (Exception e)&#123;</span><br><span class="line">            BEAN.log(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">public static void handleExceptions() throws FileSystemException&#123;</span><br><span class="line">    try &#123;</span><br><span class="line">        BEAN.throwExceptions();</span><br><span class="line">    &#125; catch (FileSystemException e)&#123;</span><br><span class="line">        BEAN.log(e);</span><br><span class="line">        throw e;</span><br><span class="line">    &#125; catch (IOException e) &#123;</span><br><span class="line">        BEAN.log(e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-4-显示所发生的异常的堆栈跟踪"><a href="#2-4-显示所发生的异常的堆栈跟踪" class="headerlink" title="2.4 显示所发生的异常的堆栈跟踪"></a>2.4 显示所发生的异常的堆栈跟踪</h3><p>实现如下。在 handleExceptions 方法中，处理所有未检查异常。然后使用 printStack 方法来显示所发生的异常的堆栈跟踪。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">public class Solution &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        handleExceptions(new Solution());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void handleExceptions(Solution obj) &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            obj.method1();</span><br><span class="line">            obj.method2();</span><br><span class="line">            obj.method3();</span><br><span class="line">        &#125; catch (Exception e)&#123;</span><br><span class="line">            printStack(e);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void printStack(Throwable throwable) &#123;</span><br><span class="line">        System.out.println(throwable);</span><br><span class="line">        for (StackTraceElement element : throwable.getStackTrace()) &#123;</span><br><span class="line">            System.out.println(element);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void method1() &#123;</span><br><span class="line">        throw new NullPointerException();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void method2() &#123;</span><br><span class="line">        throw new IndexOutOfBoundsException();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void method3() &#123;</span><br><span class="line">        throw new NumberFormatException();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="3-一个小练习"><a href="#3-一个小练习" class="headerlink" title="3. 一个小练习"></a>3. 一个小练习</h2><p>要求：编写一个程序，该程序将从键盘读取数字 。从键盘读取数字的代码必须在 readData 方法中。将 readData 中的代码封装在 try-catch 块中。如果用户输入文本而不是数字，则该方法应捕获异常 ，然后显示所有先前输入的数字。在新行中按之前输入的顺序显示每个数字。</p>
+<p>我的实现代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">public class Solution &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        readData();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void readData() &#123;</span><br><span class="line">        ArrayList&lt;Integer&gt; arrayList &#x3D; new ArrayList&lt;&gt;();</span><br><span class="line">        try &#123;</span><br><span class="line">            BufferedReader reader &#x3D; new BufferedReader(new InputStreamReader(System.in));</span><br><span class="line">            while (true)&#123;</span><br><span class="line">                int num &#x3D; Integer.parseInt(reader.readLine());</span><br><span class="line">                arrayList.add(num);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            for (Integer i: arrayList) &#123;</span><br><span class="line">                System.out.println(i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2><p>通过几个小题目，不仅练习了异常的捕获和抛出，而且进一步的研究了堆栈跟踪。在实现中，当有继承关系时，需要注意catch的匹配顺序。另外，打印异常的传播线，可以帮助代码的调试。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">An</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://jiaan001.github.io/2021/03/14/%E5%A0%86%E6%A0%88%E8%B7%9F%E8%B8%AA%E5%92%8C%E5%BC%82%E5%B8%B8%E6%8D%95%E8%8E%B7/">https://jiaan001.github.io/2021/03/14/堆栈跟踪和异常捕获/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://jiaan001.github.io" target="_blank">An的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/java%E5%9F%BA%E7%A1%80%E5%8F%8D%E5%A4%8D%E7%BB%83%E4%B9%A0/">java基础反复练习</a></div><div class="post_share"><div class="social-share" data-image="/img/a1.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/img/wechat.jpg" target="_blank"><img class="post-qr-code-img" src="/img/wechat.jpg" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="/img/alipay.jpg" target="_blank"><img class="post-qr-code-img" src="/img/alipay.jpg" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2021/03/14/%E6%97%B6%E9%97%B4%E6%A0%BC%E5%BC%8F%E7%9A%84%E8%BD%AC%E6%8D%A2/"><img class="next-cover" src="/img/a5.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">时间格式的转换</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/03/09/Character类相关操作的简单练习/" title="Character类相关操作的简单练习"><img class="cover" src="/img/a2.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-09</div><div class="title">Character类相关操作的简单练习</div></div></a></div><div><a href="/2021/03/14/时间格式的转换/" title="时间格式的转换"><img class="cover" src="/img/a5.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-14</div><div class="title">时间格式的转换</div></div></a></div></div></div></div><div class="aside_content" id="aside_content"><div class="card-widget card-info"><div class="card-content"><div class="card-info-avatar is-center"><img class="avatar-img" src="/img/a.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">An</div><div class="author-info__description">个人技术博客</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">5</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">2</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/jiaan001"><i class="fab fa-github"></i><span>Follow Me</span></a></div></div><div class="card-widget card-announcement"><div class="card-content"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="card-content"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E8%BF%94%E5%9B%9E%E5%A0%86%E6%A0%88%E8%B7%9F%E8%B8%AA"><span class="toc-text">1. 返回堆栈跟踪</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E5%AF%B9%E5%BC%82%E5%B8%B8%E7%9A%84%E6%80%BB%E7%BB%93"><span class="toc-text">2. 对异常的总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E5%BC%82%E5%B8%B8%E5%8F%AA%E6%8D%95%E8%8E%B7%E5%BC%82%E5%B8%B8"><span class="toc-text">2.1 异常只捕获异常</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E6%8D%95%E8%8E%B7%E4%B8%80%E7%BB%84%E5%BC%82%E5%B8%B8"><span class="toc-text">2.2 捕获一组异常</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E6%8D%95%E8%8E%B7%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BC%82%E5%B8%B8"><span class="toc-text">2.3 捕获自定义异常</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E6%98%BE%E7%A4%BA%E6%89%80%E5%8F%91%E7%94%9F%E7%9A%84%E5%BC%82%E5%B8%B8%E7%9A%84%E5%A0%86%E6%A0%88%E8%B7%9F%E8%B8%AA"><span class="toc-text">2.4 显示所发生的异常的堆栈跟踪</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E4%B8%80%E4%B8%AA%E5%B0%8F%E7%BB%83%E4%B9%A0"><span class="toc-text">3. 一个小练习</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E6%80%BB%E7%BB%93"><span class="toc-text">4. 总结</span></a></li></ol></div></div></div><div class="card-widget card-recent-post"><div class="card-content"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/03/14/%E5%A0%86%E6%A0%88%E8%B7%9F%E8%B8%AA%E5%92%8C%E5%BC%82%E5%B8%B8%E6%8D%95%E8%8E%B7/" title="堆栈跟踪和异常捕获"><img src="/img/a1.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="堆栈跟踪和异常捕获"/></a><div class="content"><a class="title" href="/2021/03/14/%E5%A0%86%E6%A0%88%E8%B7%9F%E8%B8%AA%E5%92%8C%E5%BC%82%E5%B8%B8%E6%8D%95%E8%8E%B7/" title="堆栈跟踪和异常捕获">堆栈跟踪和异常捕获</a><time datetime="2021-03-14T11:06:54.000Z" title="发表于 2021-03-14 19:06:54">2021-03-14</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/03/14/%E6%97%B6%E9%97%B4%E6%A0%BC%E5%BC%8F%E7%9A%84%E8%BD%AC%E6%8D%A2/" title="时间格式的转换"><img src="/img/a5.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="时间格式的转换"/></a><div class="content"><a class="title" href="/2021/03/14/%E6%97%B6%E9%97%B4%E6%A0%BC%E5%BC%8F%E7%9A%84%E8%BD%AC%E6%8D%A2/" title="时间格式的转换">时间格式的转换</a><time datetime="2021-03-14T07:16:22.000Z" title="发表于 2021-03-14 15:16:22">2021-03-14</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/03/13/705-%E8%AE%BE%E8%AE%A1%E5%93%88%E5%B8%8C%E9%9B%86%E5%90%88/" title="705. 设计哈希集合"><img src="/img/a3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="705. 设计哈希集合"/></a><div class="content"><a class="title" href="/2021/03/13/705-%E8%AE%BE%E8%AE%A1%E5%93%88%E5%B8%8C%E9%9B%86%E5%90%88/" title="705. 设计哈希集合">705. 设计哈希集合</a><time datetime="2021-03-13T13:12:37.000Z" title="发表于 2021-03-13 21:12:37">2021-03-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/03/12/331-%E9%AA%8C%E8%AF%81%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%89%8D%E5%BA%8F%E5%BA%8F%E5%88%97%E5%8C%96/" title="331. 验证二叉树的前序序列化"><img src="/img/a0.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="331. 验证二叉树的前序序列化"/></a><div class="content"><a class="title" href="/2021/03/12/331-%E9%AA%8C%E8%AF%81%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%89%8D%E5%BA%8F%E5%BA%8F%E5%88%97%E5%8C%96/" title="331. 验证二叉树的前序序列化">331. 验证二叉树的前序序列化</a><time datetime="2021-03-12T12:21:22.000Z" title="发表于 2021-03-12 20:21:22">2021-03-12</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/03/09/Character%E7%B1%BB%E7%9B%B8%E5%85%B3%E6%93%8D%E4%BD%9C%E7%9A%84%E7%AE%80%E5%8D%95%E7%BB%83%E4%B9%A0/" title="Character类相关操作的简单练习"><img src="/img/a2.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Character类相关操作的简单练习"/></a><div class="content"><a class="title" href="/2021/03/09/Character%E7%B1%BB%E7%9B%B8%E5%85%B3%E6%93%8D%E4%BD%9C%E7%9A%84%E7%AE%80%E5%8D%95%E7%BB%83%E4%B9%A0/" title="Character类相关操作的简单练习">Character类相关操作的简单练习</a><time datetime="2021-03-09T06:20:52.000Z" title="发表于 2021-03-09 14:20:52">2021-03-09</time></div></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(/img/a1.jpg)"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By An</div><div class="footer_custom_text"><a href="https://jiaan001.github.io/">欢迎来到我的博客</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-fluttering-ribbon.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>
